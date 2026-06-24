@@ -1,0 +1,279 @@
+import streamlit as st
+import pandas as pd
+import os
+
+st.set_page_config(page_title="Asset Management", layout="wide")
+
+# Simple Login
+USERS = {
+    "admin": "admin123",
+    "user": "user123"
+}
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if not st.session_state.logged_in:
+    st.title("🔐 Asset Management Login")
+
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+
+    if st.button("Login"):
+        if username in USERS and USERS[username] == password:
+            st.session_state.logged_in = True
+            st.session_state.username = username
+            st.rerun()
+        else:
+            st.error("Invalid Username or Password")
+
+    st.stop()
+
+st.sidebar.image("images.png", use_container_width=True)
+
+st.sidebar.success(f"Logged in as: {st.session_state.username}")
+
+# ==========================
+# SIDEBAR MENU
+# ==========================
+with st.sidebar.expander("⚙️ Assets", expanded=True):
+
+    menu = st.radio(
+        "",
+        [
+            "📋 List of Assets",
+            "➕ Add New Asset",
+            "📤 Import Data",
+            "📥 Export Data"
+        ]
+    )
+
+if st.sidebar.button("Logout"):
+    st.session_state.logged_in = False
+    st.rerun()
+
+st.title("💻 Asset Management App")
+
+# ==========================
+# IMPORT DATA
+# ==========================
+if menu == "📤 Import Data":
+
+    st.subheader("📤 Import Data")
+
+    uploaded_file = st.file_uploader(
+        "Upload Excel or CSV File",
+        type=["xlsx", "csv"]
+    )
+
+    if uploaded_file is not None:
+
+        if uploaded_file.name.endswith(".csv"):
+            st.session_state.df = pd.read_csv(uploaded_file)
+
+        else:
+            st.session_state.df = pd.read_excel(uploaded_file)
+
+        # Save imported data permanently
+        st.session_state.df.to_excel(FILE_NAME, index=False)
+
+        st.success("✅ Data Imported Successfully and Saved!")
+
+st.title("💻 Asset Management App")
+
+columns = ["FA_No","Description","Serial_No_",
+           "Responsible_Employee","Employee_Code",
+           "Asset_Type","Fa_Type","Fa_Status",
+           "Keyboard","Mouse","Headphone",
+           "Laptop_Stand","Vendor","Invoice_No_"]
+
+# File name for permanent storage
+FILE_NAME = "asset_data.xlsx"
+
+# Load existing data if file exists
+if "df" not in st.session_state:
+
+    if os.path.exists(FILE_NAME):
+        st.session_state.df = pd.read_excel(FILE_NAME)
+    else:
+        st.session_state.df = pd.DataFrame(columns=columns)
+
+# ==========================
+# ADD NEW ASSET
+# ==========================
+if menu == "➕ Add New Asset":
+
+    st.subheader("➕ Add New Asset")
+
+    with st.form("add_asset_form"):
+
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            fa_no = st.text_input("FA No")
+            description = st.text_input("Description")
+            serial_no = st.text_input("Serial No")
+            employee = st.text_input("Responsible Employee")
+
+        with col2:
+            emp_code = st.text_input("Employee Code")
+            
+            asset_type = st.selectbox(
+                "Asset Type",
+                [
+                    "Camera",
+                    "Desktop",
+                    "Firewalls (UTM)",
+                    "Routers & Switches",
+                    "IP PBX & IP Desk Phones",
+                    "Laptop",
+                    "Mac Book",
+                    "Printer",
+                    "Servers & Storage",
+                    "Software",
+                    "TVs and Monitors",
+                    "Video Conferencing Devices",
+                    "Workstation"
+                ]
+            )
+            fa_type = st.selectbox(
+                "FA Type",
+                [
+                    "Inuse",
+                    "Not in use"
+                ]
+            )
+            fa_status = st.selectbox(
+                "FA Status",
+                [
+                    "Corporate Office",
+                    "Shyam Nagar",
+                    "Delhi Office",
+                    "Gurugram Office",
+                    "ROOMA",
+                    "Aadhunik Sarh",
+                    "Magnus Malwan",
+                    "Malwan",
+                    "MRO",
+                    "ARP Sarh"
+                ]
+            )
+            
+            keyboard = st.selectbox("Keyboard", ["Yes", "No"])
+
+        with col3:
+            mouse = st.selectbox("Mouse", ["Yes", "No"])
+            headphone = st.selectbox("Headphone", ["Yes", "No"])
+            laptop_stand = st.selectbox("Laptop Stand", ["Yes", "No"])
+            vendor = st.text_input("Vendor")
+            invoice_no = st.text_input("Invoice No")
+
+        submit = st.form_submit_button("➕ Add Asset")
+
+        if submit:
+
+            new_row = {
+                "FA_No": fa_no,
+                "Description": description,
+                "Serial_No_": serial_no,
+                "Responsible_Employee": employee,
+                "Employee_Code": emp_code,
+                "Asset_Type": asset_type,
+                "Fa_Type": fa_type,
+                "Fa_Status": fa_status,
+                "Keyboard": keyboard,
+                "Mouse": mouse,
+                "Headphone": headphone,
+                "Laptop_Stand": laptop_stand,
+                "Vendor": vendor,
+                "Invoice_No_": invoice_no
+            }
+
+            st.session_state.df = pd.concat(
+                [st.session_state.df, pd.DataFrame([new_row])],
+                ignore_index=True
+            )
+
+            st.session_state.df.to_excel(FILE_NAME, index=False)
+
+            st.success("✅ Asset Added Successfully")
+
+if menu == "📋 List of Assets":
+
+    search = st.text_input("🔍 Search by FA No / Employee")
+
+    df_show = st.session_state.df.copy()
+
+    if search:
+        mask = (
+            df_show["FA_No"].astype(str).str.contains(search, case=False, na=False) |
+            df_show["Responsible_Employee"].astype(str).str.contains(search, case=False, na=False) |
+            df_show["Employee_Code"].astype(str).str.contains(search, case=False, na=False)
+        )
+
+        df_show = df_show[mask]
+
+    # Add Delete Column if not exists
+    if "Delete" not in df_show.columns:
+        df_show["Delete"] = False
+
+    edited_df = st.data_editor(
+        df_show,
+        use_container_width=True,
+        hide_index=True
+    )
+
+    # Save Edited Data
+    if st.button("💾 Save Changes"):
+
+        # Delete column hata do
+        final_df = edited_df.drop(columns=["Delete"], errors="ignore")
+
+        st.session_state.df = final_df
+
+        # Excel me save karo
+        st.session_state.df.to_excel(FILE_NAME, index=False)
+
+        st.success("✅ Changes Saved Successfully")
+        st.rerun()
+
+    # Delete selected rows
+    if st.button("🗑️ Delete Selected Rows"):
+
+        st.session_state.df = edited_df[
+            edited_df["Delete"] == False
+        ].drop(columns=["Delete"])
+
+        # Save after delete
+        st.session_state.df.to_excel(FILE_NAME, index=False)
+
+        st.success("✅ Selected rows deleted successfully")
+        st.rerun()
+
+# ==========================
+# EXPORT DATA
+# ==========================
+if menu == "📥 Export Data":
+
+    st.subheader("📥 Export Data")
+
+    csv = st.session_state.df.to_csv(index=False).encode("utf-8")
+
+    st.download_button(
+        label="Download CSV",
+        data=csv,
+        file_name="asset_data.csv",
+        mime="text/csv"
+    )
+
+    excel_file = "export_asset_data.xlsx"
+
+st.session_state.df.to_excel(excel_file, index=False)
+
+with open(excel_file, "rb") as f:
+    st.download_button(
+        label="📥 Download Excel",
+        data=f,
+        file_name="asset_data.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
