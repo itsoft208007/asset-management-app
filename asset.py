@@ -439,7 +439,6 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
         st.session_state.edit_mode = True
         st.rerun()
 
-    # Save Edited Data
     if st.button("💾 Save Changes"):
 
         final_df = edited_df.drop(
@@ -447,14 +446,29 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
             errors="ignore"
         )
 
-        st.session_state.df = final_df
+        # Original dataframe update karo
+        for index, row in final_df.iterrows():
 
+            fa_no = row["FA_No"]
+
+            original_index = st.session_state.df[
+                st.session_state.df["FA_No"] == fa_no
+            ].index
+
+            if len(original_index) > 0:
+                st.session_state.df.loc[
+                    original_index[0]
+                ] = row
+
+        # Save Excel
         st.session_state.df.to_excel(
             FILE_NAME,
             index=False
         )
 
         st.success("✅ Changes Saved Successfully")
+
+        st.rerun()
 
         st.session_state.edit_mode = False
 
