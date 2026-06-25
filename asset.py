@@ -354,7 +354,7 @@ if menu == "📋 List of Assets":
 
     with col1:
         fa_no_search = st.text_input("FA No")
-        emp_code_search = st.text_input("Employee Code")
+        emp_code = st.text_input("Employee Code")
 
     with col2:
         serial_search = st.text_input("Serial No")
@@ -367,12 +367,6 @@ if menu == "📋 List of Assets":
                  .unique()
                  .tolist()
             )
-        )
-
-    with col3:
-        fa_type_search = st.selectbox(
-            "FA Type",
-            ["All", "Inuse", "Not in use"]
         )
 
     with col3:
