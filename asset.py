@@ -78,8 +78,6 @@ if menu == "📤 Import Data":
 
         st.success("✅ Data Imported Successfully and Saved!")
 
-st.title("💻 Asset Management App")
-
 columns = ["FA_No","Description","Serial_No_",
            "Responsible_Employee","Employee_Code",
            "Asset_Type","Fa_Type","Fa_Status",
