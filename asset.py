@@ -206,6 +206,7 @@ if menu == "➕ Add New Asset":
 
         with col1:
             fa_no = st.text_input("FA No")
+            emp_code_search = st.text_input("Employee Code")
             description = st.text_input("Description")
             serial_no = st.text_input("Serial No")
             employee = st.text_input("Responsible Employee")
@@ -356,12 +357,23 @@ if menu == "📋 List of Assets":
         emp_code_search = st.text_input("Employee Code")
 
     with col2:
-    serial_search = st.text_input("Serial No")
+        serial_search = st.text_input("Serial No")
 
-    status_search = st.selectbox(
-        "Location (FA Status)",
-        ["All"] + sorted(df_show["Fa_Status"].dropna().unique().tolist())
-    )
+         status_search = st.selectbox(
+            "Location (FA Status)",
+            ["All"] + sorted(
+                df_show["Fa_Status"]
+                 .dropna()
+                 .unique()
+                 .tolist()
+            )
+        )
+
+    with col3:
+        fa_type_search = st.selectbox(
+            "FA Type",
+            ["All", "Inuse", "Not in use"]
+        )
 
 with col3:
     fa_type_search = st.selectbox(
@@ -390,13 +402,13 @@ with col3:
         ]
 
     if serial_search:
-    df_show = df_show[
-        df_show["Serial_No_"].astype(str).str.contains(
-            serial_search,
-            case=False,
-            na=False
-        )
-    ]
+        df_show = df_show[
+            df_show["Serial_No_"].astype(str).str.contains(
+                serial_search,
+                case=False,
+                na=False
+            )
+        ]
 
     if fa_type_search != "All":
         df_show = df_show[
