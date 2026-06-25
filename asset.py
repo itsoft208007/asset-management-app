@@ -39,6 +39,8 @@ if not st.session_state.logged_in:
 
             st.rerun()
 
+    
+
         else:
             st.error("Invalid Username or Password")
     
@@ -427,6 +429,16 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
         hide_index=True
     )
 
+    selected_fa = st.selectbox(
+    "✏️ Select Asset To Edit",
+    df_show["FA_No"].tolist()
+    )
+
+    if st.button("✏️ Edit Selected Asset"):
+        st.session_state.selected_fa = selected_fa
+        st.session_state.edit_mode = True
+        st.rerun()
+
     # Save Edited Data
     if st.button("💾 Save Changes"):
 
@@ -462,6 +474,65 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
 
             st.success("✅ Selected rows deleted successfully")
             st.rerun()
+
+# ==========================
+# EDIT PAGE
+# ==========================
+
+if st.session_state.edit_mode:
+
+    st.subheader("✏️ Edit Asset")
+
+    row = st.session_state.df[
+        st.session_state.df["FA_No"] ==
+        st.session_state.selected_fa
+    ].iloc[0]
+
+    description = st.text_input(
+        "Description",
+        row["Description"]
+    )
+
+    serial_no = st.text_input(
+        "Serial No",
+        row["Serial_No_"]
+    )
+
+    status = st.selectbox(
+        "Status",
+        ["Available", "Checked Out", "Scrap"],
+        index=[
+            "Available",
+            "Checked Out",
+            "Scrap"
+        ].index(
+            row["Status"]
+            if pd.notna(row["Status"])
+            else "Available"
+        )
+    )
+
+    if st.button("💾 Update Asset"):
+
+        idx = st.session_state.df[
+            st.session_state.df["FA_No"] ==
+            st.session_state.selected_fa
+        ].index[0]
+
+        st.session_state.df.at[idx, "Description"] = description
+        st.session_state.df.at[idx, "Serial_No_"] = serial_no
+        st.session_state.df.at[idx, "Status"] = status
+
+        st.session_state.df.to_excel(
+            FILE_NAME,
+            index=False
+        )
+
+        st.success("✅ Asset Updated Successfully")
+
+    if st.button("⬅️ Back To Asset List"):
+        st.session_state.edit_mode = False
+        st.rerun()
 
 # ==========================
 # EXPORT DATA
