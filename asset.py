@@ -356,23 +356,18 @@ if menu == "📋 List of Assets":
         emp_code_search = st.text_input("Employee Code")
 
     with col2:
-        asset_type_search = st.selectbox(
-            "Asset Type",
-            ["All"] + sorted(df_show["Asset_Type"].dropna().unique().tolist())
-        )
+    serial_search = st.text_input("Serial No")
 
-        status_search = st.selectbox(
-            "Location (FA Status)",
-            ["All"] + sorted(df_show["Fa_Status"].dropna().unique().tolist())
-        )
+    status_search = st.selectbox(
+        "Location (FA Status)",
+        ["All"] + sorted(df_show["Fa_Status"].dropna().unique().tolist())
+    )
 
-    with col3:
-        vendor_search = st.text_input("Vendor")
-
-        fa_type_search = st.selectbox(
-            "FA Type",
-            ["All", "Inuse", "Not in use"]
-        )
+with col3:
+    fa_type_search = st.selectbox(
+        "FA Type",
+        ["All", "Inuse", "Not in use"]
+    )
 
     # Apply Filters
 
@@ -394,24 +389,14 @@ if menu == "📋 List of Assets":
             )
         ]
 
-    if asset_type_search != "All":
-        df_show = df_show[
-            df_show["Asset_Type"] == asset_type_search
+    if serial_search:
+    df_show = df_show[
+        df_show["Serial_No_"].astype(str).str.contains(
+            serial_search,
+            case=False,
+            na=False
+        )
     ]
-
-    if status_search != "All":
-        df_show = df_show[
-            df_show["Fa_Status"] == status_search
-        ]
-
-    if vendor_search:
-        df_show = df_show[
-            df_show["Vendor"].astype(str).str.contains(
-                vendor_search,
-                case=False,
-                na=False
-            )
-        ]
 
     if fa_type_search != "All":
         df_show = df_show[
