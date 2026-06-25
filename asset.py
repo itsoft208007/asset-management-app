@@ -482,25 +482,25 @@ if menu == "📋 List of Assets":
         st.success("✅ Asset Updated Successfully")
         st.rerun()
 
-        # Save Edited Data
-        if st.button("💾 Save Changes"):
+    # Save Edited Data
+    if st.button("💾 Save Changes"):
 
-            # Delete column hata do
-            final_df = edited_df.drop
-                (columns=["Delete"], 
-                errors="ignore"
-            )
+        # Delete column hata do
+        final_df = edited_df.drop(
+            columns=["Delete"], 
+            errors="ignore"
+        )
 
-            st.session_state.df = final_df
+        st.session_state.df = final_df
 
-            # Excel me save karo
-            st.session_state.df.to_excel(
-                FILE_NAME, 
-                index=False
-            )
+        # Excel me save karo
+        st.session_state.df.to_excel(
+            FILE_NAME, 
+            index=False
+        )
 
-            st.success("✅ Changes Saved Successfully")
-            st.rerun()
+        st.success("✅ Changes Saved Successfully")
+        st.rerun()
 
     # Delete selected rows
     if st.session_state.role == "admin":
