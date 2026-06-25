@@ -41,6 +41,8 @@ if not st.session_state.logged_in:
 
         else:
             st.error("Invalid Username or Password")
+    
+    st.stop()
 
 if os.path.exists("Images.png"):
     st.sidebar.image("Images.png", use_container_width=True)
@@ -53,7 +55,7 @@ if "username" in st.session_state:
 # ==========================
 with st.sidebar.expander("⚙️ Assets", expanded=True):
 
-    if st.session_state.role == "admin":
+    if st.session_state.get("role") == "admin":
 
         menu = st.radio(
             "",
