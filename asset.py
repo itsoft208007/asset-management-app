@@ -178,7 +178,7 @@ if menu == "📤 Import Data":
 
 columns = ["FA_No","Description","Serial_No_",
            "Responsible_Employee","Employee_Code",
-           "Asset_Type","Fa_Type","Fa_Status",
+           "Asset_Type","Fa_Type","Fa_Status","Status",
            "Keyboard","Mouse","Headphone",
            "Laptop_Stand","Vendor","Invoice_No_"]
 
@@ -255,6 +255,14 @@ if menu == "➕ Add New Asset":
             )
             
             keyboard = st.selectbox("Keyboard", ["Yes", "No"])
+                status = st.selectbox(
+                    "Asset Status",
+                    [
+                        "Available",
+                        "Checked Out",
+                        "Scrap"
+                    ]
+                )
 
         with col3:
             mouse = st.selectbox("Mouse", ["Yes", "No"])
@@ -276,6 +284,7 @@ if menu == "➕ Add New Asset":
                 "Asset_Type": asset_type,
                 "Fa_Type": fa_type,
                 "Fa_Status": fa_status,
+                "Status": status,
                 "Keyboard": keyboard,
                 "Mouse": mouse,
                 "Headphone": headphone,
@@ -418,8 +427,62 @@ if menu == "📋 List of Assets":
         hide_index=True
     )
 
-    # Save Edited Data
-    if st.button("💾 Save Changes"):
+    # ==========================
+    # EDIT ASSET SECTION    
+    # ==========================
+
+    st.divider()
+
+    selected_fa = st.selectbox(
+        "✏️ Select Asset To Edit",
+        df_show["FA_No"].tolist()
+    )
+
+    selected_row = df_show[
+        df_show["FA_No"] == selected_fa
+    ].iloc[0]
+
+    st.subheader("Edit Asset")
+
+    description = st.text_input(
+        "Description",
+        value=selected_row["Description"]
+    )
+
+    serial_no = st.text_input(
+        "Serial No",
+        value=selected_row["Serial_No_"]
+    )
+
+    status = st.selectbox(
+        "Status",
+        ["Available", "Checked Out", "Scrap"]
+    )
+
+    if st.button("💾 Update Asset"):
+
+        st.session_state.df.loc[
+            st.session_state.df["FA_No"] == selected_fa,
+            "Description"
+        ] = description
+
+        st.session_state.df.loc[
+            st.session_state.df["FA_No"] == selected_fa,
+            "Serial_No_"
+        ] = serial_no
+
+        st.session_state.df.loc[
+            st.session_state.df["FA_No"] == selected_fa,
+            "Status"
+        ] = status
+
+        st.session_state.df.to_excel(FILE_NAME, index=False)
+
+        st.success("✅ Asset Updated Successfully")
+        st.rerun()
+
+        # Save Edited Data
+        if st.button("💾 Save Changes"):
 
         # Delete column hata do
         final_df = edited_df.drop(columns=["Delete"], errors="ignore")
