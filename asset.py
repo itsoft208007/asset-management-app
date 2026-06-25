@@ -6,8 +6,15 @@ st.set_page_config(page_title="Asset Management", layout="wide")
 
 # Simple Login
 USERS = {
-    "admin": "admin123",
-    "user": "user123"
+    "admin": {
+        "password": "admin123",
+        "role": "admin"
+    },
+
+    "user": {
+        "password": "user123",
+        "role": "user"
+    }
 }
 
 if "logged_in" not in st.session_state:
@@ -20,10 +27,20 @@ if not st.session_state.logged_in:
     password = st.text_input("Password", type="password")
 
     if st.button("Login"):
-        if username in USERS and USERS[username] == password:
-            st.session_state.logged_in = True
-            st.session_state.username = username
-            st.rerun()
+
+    if (
+        username in USERS and
+        USERS[username]["password"] == password
+    ):
+
+        st.session_state.logged_in = True
+        st.session_state.username = username
+        st.session_state.role = USERS[username]["role"]
+
+        st.rerun()
+
+    else:
+        st.error("Invalid Username or Password")
         else:
             st.error("Invalid Username or Password")
 
@@ -37,15 +54,27 @@ st.sidebar.success(f"Logged in as: {st.session_state.username}")
 # ==========================
 with st.sidebar.expander("⚙️ Assets", expanded=True):
 
-    menu = st.radio(
-        "",
-        [
-            "📋 List of Assets",
-            "➕ Add New Asset",
-            "📤 Import Data",
-            "📥 Export Data"
-        ]
-    )
+    if st.session_state.role == "admin":
+
+        menu = st.radio(
+            "",
+            [
+                "📋 List of Assets",
+                "➕ Add New Asset",
+                "📤 Import Data",
+                "📥 Export Data"
+            ]
+        )
+
+    else:
+
+        menu = st.radio(
+            "",
+            [
+                "📋 List of Assets",
+                "📥 Export Data"
+            ]
+        )
 
 if st.sidebar.button("Logout"):
     st.session_state.logged_in = False
@@ -235,17 +264,19 @@ if menu == "📋 List of Assets":
         st.rerun()
 
     # Delete selected rows
-    if st.button("🗑️ Delete Selected Rows"):
+    if st.session_state.role == "admin":
+    
+        if st.button("🗑️ Delete Selected Rows"):
 
-        st.session_state.df = edited_df[
-            edited_df["Delete"] == False
-        ].drop(columns=["Delete"])
+            st.session_state.df = edited_df[
+                edited_df["Delete"] == False
+            ].drop(columns=["Delete"])
 
-        # Save after delete
-        st.session_state.df.to_excel(FILE_NAME, index=False)
+            # Save after delete
+            st.session_state.df.to_excel(FILE_NAME, index=False)
 
-        st.success("✅ Selected rows deleted successfully")
-        st.rerun()
+            st.success("✅ Selected rows deleted successfully")
+            st.rerun()
 
 # ==========================
 # EXPORT DATA
