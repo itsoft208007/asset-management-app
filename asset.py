@@ -28,19 +28,17 @@ if not st.session_state.logged_in:
 
     if st.button("Login"):
 
-    if (
-        username in USERS and
-        USERS[username]["password"] == password
-    ):
+        if (
+            username in USERS and
+            USERS[username]["password"] == password
+        ):
 
-        st.session_state.logged_in = True
-        st.session_state.username = username
-        st.session_state.role = USERS[username]["role"]
+            st.session_state.logged_in = True
+            st.session_state.username = username
+            st.session_state.role = USERS[username]["role"]
 
-        st.rerun()
+            st.rerun()
 
-    else:
-        st.error("Invalid Username or Password")
         else:
             st.error("Invalid Username or Password")
 
