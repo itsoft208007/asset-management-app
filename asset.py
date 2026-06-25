@@ -224,18 +224,78 @@ if menu == "➕ Add New Asset":
 
 if menu == "📋 List of Assets":
 
-    search = st.text_input("🔍 Search by FA No / Employee")
-
     df_show = st.session_state.df.copy()
 
-    if search:
-        mask = (
-            df_show["FA_No"].astype(str).str.contains(search, case=False, na=False) |
-            df_show["Responsible_Employee"].astype(str).str.contains(search, case=False, na=False) |
-            df_show["Employee_Code"].astype(str).str.contains(search, case=False, na=False)
+    st.subheader("🔍 Search Filters")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        fa_no_search = st.text_input("FA No")
+        emp_code_search = st.text_input("Employee Code")
+
+    with col2:
+        asset_type_search = st.selectbox(
+            "Asset Type",
+            ["All"] + sorted(df_show["Asset_Type"].dropna().unique().tolist())
         )
 
-        df_show = df_show[mask]
+        status_search = st.selectbox(
+            "Location (FA Status)",
+            ["All"] + sorted(df_show["Fa_Status"].dropna().unique().tolist())
+        )
+
+    with col3:
+        vendor_search = st.text_input("Vendor")
+
+        fa_type_search = st.selectbox(
+            "FA Type",
+            ["All", "Inuse", "Not in use"]
+        )
+
+    # Apply Filters
+
+    if fa_no_search:
+        df_show = df_show[
+            df_show["FA_No"].astype(str).str.contains(
+            fa_no_search,
+            case=False,
+            na=False
+        )
+    ]
+
+    if emp_code_search:
+        df_show = df_show[
+            df_show["Employee_Code"].astype(str).str.contains(
+                emp_code_search,
+                case=False,
+                na=False
+            )
+        ]
+
+    if asset_type_search != "All":
+        df_show = df_show[
+            df_show["Asset_Type"] == asset_type_search
+    ]
+
+    if status_search != "All":
+        df_show = df_show[
+            df_show["Fa_Status"] == status_search
+        ]
+
+    if vendor_search:
+        df_show = df_show[
+            df_show["Vendor"].astype(str).str.contains(
+                vendor_search,
+                case=False,
+                na=False
+            )
+        ]
+
+    if fa_type_search != "All":
+        df_show = df_show[
+            df_show["Fa_Type"] == fa_type_search
+        ]
 
     # Add Delete Column if not exists
     if "Delete" not in df_show.columns:
