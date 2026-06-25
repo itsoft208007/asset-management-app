@@ -224,6 +224,46 @@ if menu == "➕ Add New Asset":
 
 if menu == "📋 List of Assets":
 
+    # ==========================
+    # DASHBOARD CARDS
+    # ==========================
+
+    total_assets = len(st.session_state.df)
+
+    in_use = len(
+        st.session_state.df[
+            st.session_state.df["Fa_Type"] == "Inuse"
+        ]
+    )
+
+    not_in_use = len(
+        st.session_state.df[
+            st.session_state.df["Fa_Type"] == "Not in use"
+        ]
+    )
+
+    laptops = len(
+        st.session_state.df[
+            st.session_state.df["Asset_Type"] == "Laptop"
+        ]
+    )
+
+    desktops = len(
+        st.session_state.df[
+            st.session_state.df["Asset_Type"] == "Desktop"
+        ]
+    )
+
+    col1, col2, col3, col4, col5 = st.columns(5)
+
+    col1.metric("💻 Total Assets", total_assets)
+    col2.metric("✅ In Use", in_use)
+    col3.metric("❌ Not In Use", not_in_use)
+    col4.metric("🖥️ Laptops", laptops)
+    col5.metric("🖥️ Desktops", desktops)
+
+    st.divider()
+
     df_show = st.session_state.df.copy()
 
     st.subheader("🔍 Search Filters")
