@@ -45,7 +45,8 @@ if not st.session_state.logged_in:
 if os.path.exists("Images.png"):
     st.sidebar.image("Images.png", use_container_width=True)
 
-st.sidebar.success(f"Logged in as: {st.session_state.username}")
+if "username" in st.session_state:
+    st.sidebar.success(f"Logged in as: {st.session_state.username}")
 
 # ==========================
 # SIDEBAR MENU
