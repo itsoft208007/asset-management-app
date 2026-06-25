@@ -267,12 +267,12 @@ if menu == "📥 Export Data":
 
     excel_file = "export_asset_data.xlsx"
 
-st.session_state.df.to_excel(excel_file, index=False)
+    st.session_state.df.to_excel(excel_file, index=False)
 
-with open(excel_file, "rb") as f:
-    st.download_button(
-        label="📥 Download Excel",
-        data=f,
-        file_name="asset_data.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+    with open(excel_file, "rb") as f:
+        st.download_button(
+            label="📥 Download Excel",
+            data=f,
+            file_name="asset_data.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
