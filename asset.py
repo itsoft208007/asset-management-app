@@ -130,48 +130,48 @@ if menu == "📤 Import Data":
             not existing_serial.empty
         ):
 
-        st.error("❌ Duplicate Records Found")
+            st.error("❌ Duplicate Records Found")
 
-        if not duplicate_fa.empty:
-            st.warning(
-                f"Duplicate FA No in uploaded file: "
-                f"{duplicate_fa['FA_No'].tolist()}"
+            if not duplicate_fa.empty:
+                st.warning(
+                    f"Duplicate FA No in uploaded file: "
+                    f"{duplicate_fa['FA_No'].tolist()}"
+                )
+
+            if not duplicate_serial.empty:
+                st.warning(
+                    f"Duplicate Serial No in uploaded file: "
+                    f"{duplicate_serial['Serial_No_'].tolist()}"
+                )
+
+            if not existing_fa.empty:
+                st.warning(
+                    f"FA No already exists in system: "
+                    f"{existing_fa['FA_No'].tolist()}"
+                )
+
+            if not existing_serial.empty:
+                st.warning(
+                    f"Serial No already exists in system: "
+                    f"{existing_serial['Serial_No_'].tolist()}"
+                )
+
+        else:
+
+            # Sab sahi hai to import karo
+            st.session_state.df = pd.concat(
+                [st.session_state.df, import_df],
+                ignore_index=True
             )
 
-        if not duplicate_serial.empty:
-            st.warning(
-                f"Duplicate Serial No in uploaded file: "
-                f"{duplicate_serial['Serial_No_'].tolist()}"
+            st.session_state.df.to_excel(
+                FILE_NAME,
+                index=False
             )
 
-        if not existing_fa.empty:
-            st.warning(
-                f"FA No already exists in system: "
-                f"{existing_fa['FA_No'].tolist()}"
+            st.success(
+                "✅ Data Imported Successfully"
             )
-
-        if not existing_serial.empty:
-            st.warning(
-                f"Serial No already exists in system: "
-                f"{existing_serial['Serial_No_'].tolist()}"
-            )
-
-    else:
-
-        # Sab sahi hai to import karo
-        st.session_state.df = pd.concat(
-            [st.session_state.df, import_df],
-            ignore_index=True
-        )
-
-        st.session_state.df.to_excel(
-            FILE_NAME,
-            index=False
-        )
-
-        st.success(
-            "✅ Data Imported Successfully"
-        )
 
 columns = ["FA_No","Description","Serial_No_",
            "Responsible_Employee","Employee_Code",
