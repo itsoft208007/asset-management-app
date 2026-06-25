@@ -27,9 +27,8 @@ if not st.session_state.logged_in:
         else:
             st.error("Invalid Username or Password")
 
-    st.stop()
-
-st.sidebar.image("images.png", use_container_width=True)
+if os.path.exists("Images.png"):
+    st.sidebar.image("Images.png", use_container_width=True)
 
 st.sidebar.success(f"Logged in as: {st.session_state.username}")
 
