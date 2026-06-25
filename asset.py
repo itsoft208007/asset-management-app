@@ -49,6 +49,9 @@ if os.path.exists("Images.png"):
 
 if "username" in st.session_state:
     st.sidebar.success(f"Logged in as: {st.session_state.username}")
+    
+if "edit_mode" not in st.session_state:
+    st.session_state.edit_mode = False
 
 # ==========================
 # SIDEBAR MENU
@@ -303,7 +306,7 @@ if menu == "➕ Add New Asset":
 
             st.success("✅ Asset Added Successfully")
 
-if menu == "📋 List of Assets":
+if menu == "📋 List of Assets" and not st.session_state.edit_mode:
 
     # ==========================
     # DASHBOARD CARDS
@@ -427,21 +430,22 @@ if menu == "📋 List of Assets":
     # Save Edited Data
     if st.button("💾 Save Changes"):
 
-        # Delete column hata do
         final_df = edited_df.drop(
-            columns=["Delete"], 
+            columns=["Delete"],
             errors="ignore"
         )
 
         st.session_state.df = final_df
 
-        # Excel me save karo
         st.session_state.df.to_excel(
-            FILE_NAME, 
+            FILE_NAME,
             index=False
         )
 
         st.success("✅ Changes Saved Successfully")
+
+        st.session_state.edit_mode = False
+
         st.rerun()
 
     # Delete selected rows
