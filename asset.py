@@ -206,7 +206,6 @@ if menu == "➕ Add New Asset":
 
         with col1:
             fa_no = st.text_input("FA No")
-            emp_code_search = st.text_input("Employee Code")
             description = st.text_input("Description")
             serial_no = st.text_input("Serial No")
             employee = st.text_input("Responsible Employee")
@@ -386,7 +385,7 @@ if menu == "📋 List of Assets":
         )
     ]
 
-    if emp_code_search:
+    if emp_code:
         df_show = df_show[
             df_show["Employee_Code"].astype(str).str.contains(
                 emp_code_search,
