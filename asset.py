@@ -359,7 +359,7 @@ if menu == "📋 List of Assets":
     with col2:
         serial_search = st.text_input("Serial No")
 
-         status_search = st.selectbox(
+        status_search = st.selectbox(
             "Location (FA Status)",
             ["All"] + sorted(
                 df_show["Fa_Status"]
@@ -375,11 +375,11 @@ if menu == "📋 List of Assets":
             ["All", "Inuse", "Not in use"]
         )
 
-with col3:
-    fa_type_search = st.selectbox(
-        "FA Type",
-        ["All", "Inuse", "Not in use"]
-    )
+    with col3:
+        fa_type_search = st.selectbox(
+            "FA Type",
+            ["All", "Inuse", "Not in use"]
+        )
 
     # Apply Filters
 
@@ -408,6 +408,12 @@ with col3:
                 case=False,
                 na=False
             )
+        ]
+    
+    # YEH NAYA CODE ADD KARO
+    if status_search != "All":
+        df_show = df_show[
+            df_show["Fa_Status"] == status_search
         ]
 
     if fa_type_search != "All":
