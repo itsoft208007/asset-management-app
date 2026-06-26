@@ -281,16 +281,6 @@ if menu == "➕ Add New Asset":
 
         if submit:
 
-            # Duplicate FA No Check
-            if fa_no in st.session_state.df["FA_No"].astype(str).values:
-                st.error("❌ FA No already exists")
-                st.stop()
-
-            # Duplicate Serial No Check
-            if serial_no in st.session_state.df["Serial_No_"].astype(str).values:
-                st.error("❌ Serial No already exists")
-                st.stop()
-
             new_row = {
                 "FA_No": fa_no,
                 "Description": description,
