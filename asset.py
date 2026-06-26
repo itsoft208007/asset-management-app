@@ -470,17 +470,39 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
     # Delete selected rows
     if st.session_state.role == "admin":
     
-        if st.button("🗑️ Delete Selected Rows"):
+        # Delete button
+        if st.button("🗑 Delete Selected Rows"):
+            st.session_state.show_delete_confirm = True
 
-            st.session_state.df = edited_df[
-                edited_df["Delete"] == False
-            ].drop(columns=["Delete"])
+        # Confirmation box
+        if st.session_state.get("show_delete_confirm", False):
 
-            # Save after delete
-            st.session_state.df.to_excel(FILE_NAME, index=False)
+            st.warning("⚠️ Are you sure you want to delete selected rows?")
 
-            st.success("✅ Selected rows deleted successfully")
-            st.rerun()
+            col1, col2 = st.columns(2)
+
+            with col1:
+                if st.button("✅ Yes, Delete"):
+
+                st.session_state.df = edited_df[
+                    edited_df["Delete"] == False
+                ].drop(columns=["Delete"])
+
+                st.session_state.df.to_excel(
+                    FILE_NAME,
+                    index=False
+                )
+
+                st.session_state.show_delete_confirm = False
+
+                st.success("✅ Selected rows deleted successfully")
+                st.rerun()
+
+            with col2:
+                if st.button("❌ Cancel"):
+
+                    st.session_state.show_delete_confirm = False
+                    st.rerun()
 
 # ==========================
 # EDIT PAGE
