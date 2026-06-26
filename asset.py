@@ -450,21 +450,10 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
             errors="ignore"
         )
 
-        # Original dataframe update karo
-        for index, row in final_df.iterrows():
+        # Jo filtered dataframe dikh raha hai usko main dataframe me merge karo
+        for i, idx in enumerate(df_show.index):
+            st.session_state.df.loc[idx] = final_df.iloc[i]
 
-            fa_no = row["FA_No"]
-
-            original_index = st.session_state.df[
-                st.session_state.df["FA_No"] == fa_no
-            ].index
-
-            if len(original_index) > 0:
-                st.session_state.df.loc[
-                    original_index[0]
-                ] = row
-
-        # Save Excel
         st.session_state.df.to_excel(
             FILE_NAME,
             index=False
