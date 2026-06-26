@@ -109,13 +109,18 @@ if menu == "📤 Import Data":
             import_df = pd.read_excel(uploaded_file)
 
         # Duplicate check in uploaded file itself
-        duplicate_fa = import_df[
-            import_df["FA_No"].duplicated()
-        ]
 
-        duplicate_serial = import_df[
-            import_df["Serial_No_"].duplicated()
-        ]
+        fa_series = import_df["FA_No"].astype(str).str.strip()
+        serial_series = import_df["Serial_No_"].astype(str).str.strip()
+
+        # Invalid values ignore karo
+        invalid_values = ["", "nan", "None", "none", "0", "na", "NA"]
+
+        fa_clean = fa_series[~fa_series.isin(invalid_values)]
+        serial_clean = serial_series[~serial_series.isin(invalid_values)]
+
+        duplicate_fa = fa_clean[fa_clean.duplicated()]
+        duplicate_serial = serial_clean[serial_clean.duplicated()]
 
         # Existing data se duplicate check
         existing_fa = import_df[
