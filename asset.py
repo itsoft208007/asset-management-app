@@ -484,19 +484,19 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
             with col1:
                 if st.button("✅ Yes, Delete"):
 
-                st.session_state.df = edited_df[
-                    edited_df["Delete"] == False
-                ].drop(columns=["Delete"])
+                    st.session_state.df = edited_df[
+                        edited_df["Delete"] == False
+                    ].drop(columns=["Delete"])
 
-                st.session_state.df.to_excel(
-                    FILE_NAME,
-                    index=False
-                )
+                    st.session_state.df.to_excel(
+                        FILE_NAME,
+                        index=False
+                    )
 
-                st.session_state.show_delete_confirm = False
+                    st.session_state.show_delete_confirm = False
 
-                st.success("✅ Selected rows deleted successfully")
-                st.rerun()
+                    st.success("✅ Selected rows deleted successfully")
+                    st.rerun()
 
             with col2:
                 if st.button("❌ Cancel"):
