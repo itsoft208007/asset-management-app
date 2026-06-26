@@ -145,16 +145,22 @@ if menu == "📤 Import Data":
 
             st.error("❌ Duplicate Records Found")
 
-            if not duplicate_fa.empty:
+            if len(duplicate_fa) > 0:
+
+                duplicate_fa_list = list(set(duplicate_fa.tolist()))
+
                 st.warning(
                     f"Duplicate FA No in uploaded file: "
-                    f"{duplicate_fa['FA_No'].tolist()}"
+                    f"{duplicate_fa_list}"
                 )
 
-            if not duplicate_serial.empty:
+            if len(duplicate_serial) > 0:
+
+                duplicate_serial_list = list(set(duplicate_serial.tolist()))
+
                 st.warning(
                     f"Duplicate Serial No in uploaded file: "
-                    f"{duplicate_serial['Serial_No_'].tolist()}"
+                    f"{duplicate_serial_list}"
                 )
 
             if not existing_fa.empty:
