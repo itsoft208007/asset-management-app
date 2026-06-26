@@ -358,7 +358,7 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
 
     with col1:
         fa_no_search = st.text_input("FA No")
-        emp_code = st.text_input("Employee Code")
+        employee_search = st.text_input("Responsible Employee")
 
     with col2:
         serial_search = st.text_input("Serial No")
@@ -390,10 +390,12 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
         )
     ]
 
-    if emp_code:
+    if employee_search:
         df_show = df_show[
-            df_show["Employee_Code"].astype(str).str.contains(
-                emp_code_search,
+            df_show["Responsible_Employee"]
+            .astype(str)
+            .str.contains(
+                employee_search,
                 case=False,
                 na=False
             )
