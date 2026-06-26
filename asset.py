@@ -291,23 +291,23 @@ if menu == "➕ Add New Asset":
                 st.error("❌ Serial No already exists")
                 st.stop()
 
-        new_row = {
-            "FA_No": fa_no,
-            "Description": description,
-            "Serial_No_": serial_no,
-            "Responsible_Employee": employee,
-            "Employee_Code": emp_code,
-            "Asset_Type": asset_type,
-            "Fa_Type": fa_type,
-            "Fa_Status": fa_status,
-            "Status": status,
-            "Keyboard": keyboard,
-            "Mouse": mouse,
-            "Headphone": headphone,
-            "Laptop_Stand": laptop_stand,
-            "Vendor": vendor,
-            "Invoice_No_": invoice_no
-        }
+            new_row = {
+                "FA_No": fa_no,
+                "Description": description,
+                "Serial_No_": serial_no,
+                "Responsible_Employee": employee,
+                "Employee_Code": emp_code,
+                "Asset_Type": asset_type,
+                "Fa_Type": fa_type,
+                "Fa_Status": fa_status,
+                "Status": status,
+                "Keyboard": keyboard,
+                "Mouse": mouse,
+                "Headphone": headphone,
+                "Laptop_Stand": laptop_stand,
+                "Vendor": vendor,
+                "Invoice_No_": invoice_no
+            }
 
             st.session_state.df = pd.concat(
                 [st.session_state.df, pd.DataFrame([new_row])],
