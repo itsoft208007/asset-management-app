@@ -431,9 +431,11 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
         hide_index=True
     )
 
+    fa_list = df_show["FA_No"].dropna().astype(str).tolist()
+
     selected_fa = st.selectbox(
-    "✏️ Select Asset To Edit",
-    df_show["FA_No"].tolist()
+        "✏️ Select Asset To Edit",
+        fa_list
     )
 
     if st.button("✏️ Edit Selected Asset"):
@@ -499,10 +501,21 @@ if st.session_state.edit_mode:
 
     st.subheader("✏️ Edit Asset")
 
-    row = st.session_state.df[
+    filtered_row = st.session_state.df[
         st.session_state.df["FA_No"] ==
-        st.session_state.selected_fa
-    ].iloc[0]
+        st.session_state.get("selected_fa", "")
+    ]
+
+    if filtered_row.empty:
+        st.error("❌ Selected Asset Not Found")
+
+        if st.button("⬅️ Back To Asset List"):
+            st.session_state.edit_mode = False
+            st.rerun()
+
+        st.stop()
+
+    row = filtered_row.iloc[0]
 
     description = st.text_input(
         "Description",
