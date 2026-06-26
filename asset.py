@@ -102,95 +102,48 @@ if menu == "📤 Import Data":
 
     if uploaded_file is not None:
 
-        # Uploaded file read karo
         if uploaded_file.name.endswith(".csv"):
             import_df = pd.read_csv(uploaded_file)
+
         else:
             import_df = pd.read_excel(uploaded_file)
 
-        # Duplicate check in uploaded file itself
+        st.session_state.df = pd.concat(
+            [st.session_state.df, import_df],
+            ignore_index=True
+        )
 
-        fa_series = import_df["FA_No"].astype(str).str.strip()
-        serial_series = import_df["Serial_No_"].astype(str).str.strip()
+        # Save permanently
+        st.session_state.df.to_excel(
+            FILE_NAME,
+            index=False
+        )
 
-        # Invalid values ignore karo
-        invalid_values = ["", "nan", "None", "none", "0", "na", "NA"]
+        st.success(
+            f"✅ {len(import_df)} records imported successfully"
+        )
 
-        fa_clean = fa_series[~fa_series.isin(invalid_values)]
-        serial_clean = serial_series[~serial_series.isin(invalid_values)]
+    if uploaded_file is not None:
 
-        duplicate_fa = fa_clean[fa_clean.duplicated()]
-        duplicate_serial = serial_clean[serial_clean.duplicated()]
-
-        # Existing data se duplicate check
-        existing_fa = import_df[
-            import_df["FA_No"].isin(
-                st.session_state.df["FA_No"]
-            )
-        ]
-
-        existing_serial = import_df[
-            import_df["Serial_No_"].isin(
-                st.session_state.df["Serial_No_"]
-            )
-        ]
-
-        # Agar duplicates mile
-        if (
-            not duplicate_fa.empty or
-            not duplicate_serial.empty or
-            not existing_fa.empty or
-            not existing_serial.empty
-        ):
-
-            st.error("❌ Duplicate Records Found")
-
-            if len(duplicate_fa) > 0:
-
-                duplicate_fa_list = list(set(duplicate_fa.tolist()))
-
-                st.warning(
-                    f"Duplicate FA No in uploaded file: "
-                    f"{duplicate_fa_list}"
-                )
-
-            if len(duplicate_serial) > 0:
-
-                duplicate_serial_list = list(set(duplicate_serial.tolist()))
-
-                st.warning(
-                    f"Duplicate Serial No in uploaded file: "
-                    f"{duplicate_serial_list}"
-                )
-
-            if not existing_fa.empty:
-                st.warning(
-                    f"FA No already exists in system: "
-                    f"{existing_fa['FA_No'].tolist()}"
-                )
-
-            if not existing_serial.empty:
-                st.warning(
-                    f"Serial No already exists in system: "
-                    f"{existing_serial['Serial_No_'].tolist()}"
-                )
+        if uploaded_file.name.endswith(".csv"):
+            import_df = pd.read_csv(uploaded_file)
 
         else:
+            import_df = pd.read_excel(uploaded_file)
 
-            # Sab sahi hai to import karo
-            st.session_state.df = pd.concat(
-                [st.session_state.df, import_df],
-                ignore_index=True
-            )
+        st.session_state.df = pd.concat(
+            [st.session_state.df, import_df],
+            ignore_index=True
+        )
 
-            st.session_state.df.to_excel(
-                FILE_NAME,
-                index=False
-            )
+        st.session_state.df.to_excel(
+            FILE_NAME,
+            index=False
+        )
 
-            st.success(
-                "✅ Data Imported Successfully"
-            )
+        st.success(
+            f"✅ {len(import_df)} records imported successfully"
+        )
 
 columns = ["FA_No","Description","Serial_No_",
            "Responsible_Employee","Employee_Code",
