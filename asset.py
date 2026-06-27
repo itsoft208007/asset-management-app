@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
+from datetime import datetime
 
 st.set_page_config(page_title="Asset Management", layout="wide")
 
@@ -104,6 +105,8 @@ columns = [
     "Laptop_Stand",
     "Vendor",
     "Invoice_No_"
+    "Last_Updated_By",
+    "Last_Updated_Date"
 ]
 
 # File name for permanent storage
@@ -272,6 +275,8 @@ if menu == "➕ Add New Asset":
                 "Laptop_Stand": laptop_stand,
                 "Vendor": vendor,
                 "Invoice_No_": invoice_no
+                "Last_Updated_By": st.session_state.username,
+                "Last_Updated_Date": datetime.now().strftime("%d-%m-%Y %H:%M")
             }
 
             st.session_state.df = pd.concat(
@@ -557,6 +562,14 @@ if st.session_state.edit_mode:
         st.session_state.df.at[idx, "Description"] = description
         st.session_state.df.at[idx, "Serial_No_"] = serial_no
         st.session_state.df.at[idx, "Status"] = status
+
+        st.session_state.df.at[
+            idx, "Last_Updated_By"
+        ] = st.session_state.username
+
+        st.session_state.df.at[
+            idx, "Last_Updated_Date"
+        ] = datetime.now().strftime("%d-%m-%Y %H:%M")
 
         st.session_state.df.to_excel(
             FILE_NAME,
