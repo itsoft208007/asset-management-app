@@ -157,17 +157,9 @@ if menu == "📤 Import Data":
 if "df" not in st.session_state:
 
     try:
-        st.write("Excel File Found :", os.path.exists(FILE_NAME))
-
         if os.path.exists(FILE_NAME):
 
             st.session_state.df = pd.read_excel(FILE_NAME)
-
-            st.write("Data Preview")
-            st.write(st.session_state.df.head())
-
-            st.write("Columns Found")
-            st.write(st.session_state.df.columns.tolist())
 
         else:
 
@@ -351,6 +343,8 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
     st.divider()
 
     df_show = st.session_state.df.copy()
+        if "Sno_" in df_show.columns:
+            df_show = df_show.drop(columns=["Sno_"])
 
     st.subheader("🔍 Search Filters")
 
