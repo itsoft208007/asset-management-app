@@ -344,49 +344,6 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
 
     df_show = st.session_state.df.copy()
 
-    # Duplicate FA Records Highlight
-
-    duplicate_df = st.session_state.df[
-        st.session_state.df.duplicated(
-            subset=["FA_No"],
-            keep=False
-        )
-    ]
-
-    if not duplicate_df.empty:
-
-        st.warning(
-            f"⚠️ Duplicate FA Numbers Found : "
-            f"{duplicate_df['FA_No'].nunique()}"
-        )
-
-        def highlight_duplicates(row):
-
-            duplicate = (
-                st.session_state.df["FA_No"] == row["FA_No"]
-            ).sum() > 1
-
-            if duplicate:
-                return [
-                    "background-color: #ffcccc"
-                ] * len(row)
-
-            return [""] * len(row)
-
-        with st.expander(
-            "🔁 Show Duplicate FA Records"
-        ):
-
-            st.dataframe(
-                duplicate_df
-                .sort_values("FA_No")
-                .style.apply(
-                    highlight_duplicates,
-                    axis=1
-                ),
-            use_container_width=True
-        )
-
     if "Sno_" in df_show.columns:
         df_show = df_show.drop(columns=["Sno_"])
 
