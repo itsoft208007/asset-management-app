@@ -157,15 +157,30 @@ if menu == "📤 Import Data":
 if "df" not in st.session_state:
 
     try:
+        st.write("Excel File Found :", os.path.exists(FILE_NAME))
+
         if os.path.exists(FILE_NAME):
+
             st.session_state.df = pd.read_excel(FILE_NAME)
+
+            st.write("Data Preview")
+            st.write(st.session_state.df.head())
+
+            st.write("Columns Found")
+            st.write(st.session_state.df.columns.tolist())
+
         else:
+
+            st.warning("Excel file not found. New file will be created.")
+
             st.session_state.df = pd.DataFrame(columns=columns)
 
     except Exception as e:
+
         st.error(f"Error loading file: {e}")
+
         st.session_state.df = pd.DataFrame(columns=columns)
-        
+
 # ==========================
 # ADD NEW ASSET
 # ==========================
