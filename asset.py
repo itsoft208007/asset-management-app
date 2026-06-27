@@ -83,7 +83,7 @@ with st.sidebar.expander("⚙️ Assets", expanded=True):
         )
 
 if st.sidebar.button("Logout"):
-    st.session_state.logged_in = False
+    st.session_state.clear()
     st.rerun()
 
 st.title("💻 Asset Management App")
@@ -156,11 +156,16 @@ if menu == "📤 Import Data":
 # Load existing data if file exists
 if "df" not in st.session_state:
 
-    if os.path.exists(FILE_NAME):
-        st.session_state.df = pd.read_excel(FILE_NAME)
-    else:
-        st.session_state.df = pd.DataFrame(columns=columns)
+    try:
+        if os.path.exists(FILE_NAME):
+            st.session_state.df = pd.read_excel(FILE_NAME)
+        else:
+            st.session_state.df = pd.DataFrame(columns=columns)
 
+    except Exception as e:
+        st.error(f"Error loading file: {e}")
+        st.session_state.df = pd.DataFrame(columns=columns)
+        
 # ==========================
 # ADD NEW ASSET
 # ==========================
@@ -272,6 +277,23 @@ if menu == "➕ Add New Asset":
             st.success("✅ Asset Added Successfully")
 
 if menu == "📋 List of Assets" and not st.session_state.edit_mode:
+
+    required_cols = [
+        "FA_No",
+        "Fa_Type",
+        "Asset_Type",
+        "Fa_Status"
+    ]
+
+    missing = [
+        col for col in required_cols
+        if col not in st.session_state.df.columns
+    ]
+
+    if missing:
+        st.error(f"Missing columns in Excel: {missing}")
+        st.write(st.session_state.df.columns.tolist())
+        st.stop()
 
     # ==========================
     # DASHBOARD CARDS
