@@ -343,8 +343,9 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
     st.divider()
 
     df_show = st.session_state.df.copy()
-        if "Sno_" in df_show.columns:
-            df_show = df_show.drop(columns=["Sno_"])
+
+    if "Sno_" in df_show.columns:
+        df_show = df_show.drop(columns=["Sno_"])
 
     st.subheader("🔍 Search Filters")
 
