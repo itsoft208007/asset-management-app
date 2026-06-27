@@ -88,6 +88,27 @@ if st.sidebar.button("Logout"):
 
 st.title("💻 Asset Management App")
 
+columns = [
+    "FA_No",
+    "Description",
+    "Serial_No_",
+    "Responsible_Employee",
+    "Employee_Code",
+    "Asset_Type",
+    "Fa_Type",
+    "Fa_Status",
+    "Status",
+    "Keyboard",
+    "Mouse",
+    "Headphone",
+    "Laptop_Stand",
+    "Vendor",
+    "Invoice_No_"
+]
+
+# File name for permanent storage
+FILE_NAME = "asset_data.xlsx"
+
 # ==========================
 # IMPORT DATA
 # ==========================
@@ -108,28 +129,15 @@ if menu == "📤 Import Data":
         else:
             import_df = pd.read_excel(uploaded_file)
 
-        st.session_state.df = pd.concat(
-            [st.session_state.df, import_df],
-            ignore_index=True
-        )
+        # Remove extra spaces from column names
+        import_df.columns = import_df.columns.str.strip()
 
-        # Save permanently
-        st.session_state.df.to_excel(
-            FILE_NAME,
-            index=False
-        )
+        # Check missing columns
+        missing_cols = set(columns) - set(import_df.columns)
 
-        st.success(
-            f"✅ {len(import_df)} records imported successfully"
-        )
-
-    if uploaded_file is not None:
-
-        if uploaded_file.name.endswith(".csv"):
-            import_df = pd.read_csv(uploaded_file)
-
-        else:
-            import_df = pd.read_excel(uploaded_file)
+        if missing_cols:
+            st.error(f"Missing columns: {missing_cols}")
+            st.stop()
 
         st.session_state.df = pd.concat(
             [st.session_state.df, import_df],
@@ -144,15 +152,6 @@ if menu == "📤 Import Data":
         st.success(
             f"✅ {len(import_df)} records imported successfully"
         )
-
-columns = ["FA_No","Description","Serial_No_",
-           "Responsible_Employee","Employee_Code",
-           "Asset_Type","Fa_Type","Fa_Status","Status",
-           "Keyboard","Mouse","Headphone",
-           "Laptop_Stand","Vendor","Invoice_No_"]
-
-# File name for permanent storage
-FILE_NAME = "asset_data.xlsx"
 
 # Load existing data if file exists
 if "df" not in st.session_state:
