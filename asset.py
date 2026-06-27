@@ -274,7 +274,7 @@ if menu == "➕ Add New Asset":
                 "Headphone": headphone,
                 "Laptop_Stand": laptop_stand,
                 "Vendor": vendor,
-                "Invoice_No_": invoice_no
+                "Invoice_No_": invoice_no,
                 "Last_Updated_By": st.session_state.username,
                 "Last_Updated_Date": datetime.now().strftime("%d-%m-%Y %H:%M")
             }
