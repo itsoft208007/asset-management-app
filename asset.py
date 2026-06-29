@@ -430,7 +430,8 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
     edited_df = st.data_editor(
         df_show,
         use_container_width=True,
-        hide_index=True
+        hide_index=False,
+        key="asset_editor"
     )
 
     fa_list = df_show["FA_No"].dropna().astype(str).tolist()
@@ -447,23 +448,29 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
 
     if st.button("💾 Save Changes"):
 
+        # Delete column hata do
         final_df = edited_df.drop(
             columns=["Delete"],
             errors="ignore"
         )
 
-        # Jo filtered dataframe dikh raha hai usko main dataframe me merge karo
-        for i, idx in enumerate(df_show.index):
-            st.session_state.df.loc[idx] = final_df.iloc[i]
+        # Original dataframe update karo
+        for idx in final_df.index:
 
-        st.session_state.df.to_excel(
-            FILE_NAME,
-            index=False
-        )
+            if idx in st.session_state.df.index:
 
-        st.success("✅ Changes Saved Successfully")
+                for col in final_df.columns:
+                    st.session_state.df.at[idx, col] = final_df.at[idx, col]
 
-        st.session_state.edit_mode = False
+                # Last updated info
+                st.session_state.df.at[idx, "Last_Updated_By"] = st.session_state.username
+                st.session_state.df.at[idx, "Last_Updated_Date"] = datetime.now().strftime("%d-%m-%Y %H:%M")
+
+        # Excel me save karo
+        st.session_state.df.to_excel(FILE_NAME, index=False)
+
+        st.success("✅ All changes saved successfully")
+
         st.rerun()
 
     # Delete selected rows
