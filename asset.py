@@ -5,35 +5,6 @@ from datetime import datetime
 
 st.set_page_config(page_title="Asset Management", layout="wide")
 
-st.set_page_config(page_title="Asset Management", layout="wide")
-
-# Professional Theme
-st.markdown("""
-<style>
-
-.stApp {
-    background-color: #F5F7FA;
-}
-
-div[data-testid="metric-container"] {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-div[data-testid="metric-container"] > label {
-    font-size: 18px;
-    font-weight: bold;
-}
-
-div[data-testid="metric-container"] > div {
-    font-size: 24px;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
 # Simple Login
 USERS = {
     "admin": {
