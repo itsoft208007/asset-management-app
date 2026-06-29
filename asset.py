@@ -161,6 +161,8 @@ if "df" not in st.session_state:
 
     try:
         if os.path.exists(FILE_NAME):
+            st.write("Rows Loaded:", len(st.session_state.df))
+            st.write("Columns:", st.session_state.df.columns.tolist())
 
             st.session_state.df = pd.read_excel(FILE_NAME)
 
@@ -461,10 +463,7 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
 
         st.success("✅ Changes Saved Successfully")
 
-        st.rerun()
-
         st.session_state.edit_mode = False
-
         st.rerun()
 
     # Delete selected rows
