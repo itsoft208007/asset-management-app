@@ -104,7 +104,7 @@ columns = [
     "Headphone",
     "Laptop_Stand",
     "Vendor",
-    "Invoice_No_"
+    "Invoice_No_",
     "Last_Updated_By",
     "Last_Updated_Date"
 ]
@@ -161,9 +161,7 @@ if "df" not in st.session_state:
 
     try:
         if os.path.exists(FILE_NAME):
-            st.write("Rows Loaded:", len(st.session_state.df))
-            st.write("Columns:", st.session_state.df.columns.tolist())
-
+            
             st.session_state.df = pd.read_excel(FILE_NAME)
 
         else:
@@ -177,6 +175,8 @@ if "df" not in st.session_state:
         st.error(f"Error loading file: {e}")
 
         st.session_state.df = pd.DataFrame(columns=columns)
+
+        st.write("Rows Loaded:", len(st.session_state.df))
 
 # ==========================
 # ADD NEW ASSET
