@@ -431,8 +431,11 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
         df_show,
         use_container_width=True,
         hide_index=False,
-        key="asset_editor"
+        key="asset_editor",
+        num_rows="fixed"
     )
+
+    st.session_state["edited_df"] = edited_df
 
     fa_list = df_show["FA_No"].dropna().astype(str).tolist()
 
@@ -449,7 +452,7 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
     if st.button("💾 Save Changes"):
 
         # Delete column hata do
-        final_df = edited_df.drop(
+        final_df = st.session_state["edited_df"].drop(
             columns=["Delete"],
             errors="ignore"
         )
