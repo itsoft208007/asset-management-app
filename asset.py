@@ -530,6 +530,14 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
                     st.session_state.show_delete_confirm = False
 
                     st.success("✅ Selected rows deleted successfully")
+
+                     # Filters reset karo
+                    st.session_state.pop("fa_search", None)
+                    st.session_state.pop("emp_search", None)
+                    st.session_state.pop("serial_search", None)
+                    st.session_state.pop("status_search", None)
+                    st.session_state.pop("fa_type_search", None)
+                    
                     st.rerun()
 
             with col2:
