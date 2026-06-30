@@ -358,13 +358,13 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
 
     if st.button("🔄 Show All Assets"):
 
-        st.session_state.pop("fa_search", None)
-        st.session_state.pop("emp_search", None)
-        st.session_state.pop("serial_search", None)
-        st.session_state.pop("status_search", None)
-        st.session_state.pop("fa_type_search", None)
+        st.session_state.fa_search = ""
+        st.session_state.emp_search = ""
+        st.session_state.serial_search = ""
+        st.session_state.status_search = "All"
+        st.session_state.fa_type_search = "All"
 
-        st.rerun()
+    st.rerun()
 
     col1, col2, col3 = st.columns(3)
 
