@@ -356,14 +356,34 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
 
     st.subheader("🔍 Search Filters")
 
+    if st.button("🔄 Show All Assets"):
+
+        st.session_state.pop("fa_search", None)
+        st.session_state.pop("emp_search", None)
+        st.session_state.pop("serial_search", None)
+        st.session_state.pop("status_search", None)
+        st.session_state.pop("fa_type_search", None)
+
+        st.rerun()
+
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        fa_no_search = st.text_input("FA No")
-        employee_search = st.text_input("Responsible Employee")
+        fa_no_search = st.text_input(
+            "FA No",
+            key="fa_search"
+        )
+
+        employee_search = st.text_input(
+            "Responsible Employee",
+            key="emp_search"
+        )
 
     with col2:
-        serial_search = st.text_input("Serial No")
+        serial_search = st.text_input(
+            "Serial No",
+            key="serial_search"
+        )
 
         status_search = st.selectbox(
             "Location (FA Status)",
@@ -372,13 +392,15 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
                  .dropna()
                  .unique()
                  .tolist()
-            )
+            ),
+            key="status_search"
         )
 
     with col3:
         fa_type_search = st.selectbox(
             "FA Type",
-            ["All", "Inuse", "Not in use"]
+            ["All", "Inuse", "Not in use"],
+            key="fa_type_search"
         )
 
     # Apply Filters
@@ -473,6 +495,13 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
         st.session_state.df.to_excel(FILE_NAME, index=False)
 
         st.success("✅ All changes saved successfully")
+
+        # Filters clear karo
+        st.session_state.pop("fa_search", None)
+        st.session_state.pop("emp_search", None)
+        st.session_state.pop("serial_search", None)
+        st.session_state.pop("status_search", None)
+        st.session_state.pop("fa_type_search", None)
 
         st.rerun()
 
