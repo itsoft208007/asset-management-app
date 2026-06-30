@@ -492,23 +492,6 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
 
         st.success("✅ All changes saved successfully")
 
-        st.session_state.pop("fa_search", None)
-        st.session_state.pop("emp_search", None)
-        st.session_state.pop("serial_search", None)
-        st.session_state.pop("status_search", None)
-        st.session_state.pop("fa_type_search", None)
-
-        st.rerun()
-
-                # Last updated info
-                st.session_state.df.at[idx, "Last_Updated_By"] = st.session_state.username
-                st.session_state.df.at[idx, "Last_Updated_Date"] = datetime.now().strftime("%d-%m-%Y %H:%M")
-
-        # Excel me save karo
-        st.session_state.df.to_excel(FILE_NAME, index=False)
-
-        st.success("✅ All changes saved successfully")
-
         # Filters clear karo
         st.session_state.pop("fa_search", None)
         st.session_state.pop("emp_search", None)
