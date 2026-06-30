@@ -454,7 +454,8 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
         use_container_width=True,
         hide_index=False,
         key="asset_editor",
-        num_rows="fixed"
+        num_rows="fixed",
+        disabled=["Last_Updated_By", "Last_Updated_Date"]
     )
 
     st.session_state["edited_df"] = edited_df
@@ -473,19 +474,31 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
 
     if st.button("💾 Save Changes"):
 
-        # Delete column hata do
         final_df = st.session_state["edited_df"].drop(
             columns=["Delete"],
             errors="ignore"
         )
 
-        # Original dataframe update karo
+        # Sirf edited values update karo
+        st.session_state.df.update(final_df)
+
+        # Last updated info
         for idx in final_df.index:
-
             if idx in st.session_state.df.index:
+                st.session_state.df.at[idx, "Last_Updated_By"] = st.session_state.username
+                st.session_state.df.at[idx, "Last_Updated_Date"] = datetime.now().strftime("%d-%m-%Y %H:%M")
 
-                for col in final_df.columns:
-                    st.session_state.df.at[idx, col] = final_df.at[idx, col]
+        st.session_state.df.to_excel(FILE_NAME, index=False)
+
+        st.success("✅ All changes saved successfully")
+
+        st.session_state.pop("fa_search", None)
+        st.session_state.pop("emp_search", None)
+        st.session_state.pop("serial_search", None)
+        st.session_state.pop("status_search", None)
+        st.session_state.pop("fa_type_search", None)
+
+        st.rerun()
 
                 # Last updated info
                 st.session_state.df.at[idx, "Last_Updated_By"] = st.session_state.username
