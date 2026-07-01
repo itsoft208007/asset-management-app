@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
+import openpyxl
 from datetime import datetime
 
 st.set_page_config(page_title="Asset Management", layout="wide")
@@ -474,23 +475,40 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
 
     if st.button("💾 Save Changes"):
 
-        final_df = st.session_state["edited_df"].drop(
+        edited_df = st.session_state["edited_df"].copy()
+
+        # Delete column remove
+        edited_df = edited_df.drop(
             columns=["Delete"],
             errors="ignore"
         )
 
-        # Sirf edited values update karo
-        st.session_state.df.update(final_df)
+        # Original dataframe me same index ki row update karo
+        for idx in edited_df.index:
 
-        # Last updated info
-        for idx in final_df.index:
             if idx in st.session_state.df.index:
-                st.session_state.df.at[idx, "Last_Updated_By"] = st.session_state.username
-                st.session_state.df.at[idx, "Last_Updated_Date"] = datetime.now().strftime("%d-%m-%Y %H:%M")
 
-        st.session_state.df.to_excel(FILE_NAME, index=False)
+                for col in edited_df.columns:
 
-        st.success("✅ All changes saved successfully")
+                    st.session_state.df.at[idx, col] = edited_df.at[idx, col]
+
+                # Update history
+                st.session_state.df.at[
+                    idx,
+                    "Last_Updated_By"
+                ] = st.session_state.username
+
+                st.session_state.df.at[
+                    idx,
+                    "Last_Updated_Date"
+                ] = datetime.now().strftime("%d-%m-%Y %H:%M")
+
+        # Excel save
+        st.session_state.df.to_excel(
+            FILE_NAME,
+            index=False,
+            engine="openpyxl"
+        )
 
         # Filters clear karo
         st.session_state.pop("fa_search", None)
@@ -498,6 +516,8 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
         st.session_state.pop("serial_search", None)
         st.session_state.pop("status_search", None)
         st.session_state.pop("fa_type_search", None)
+
+        st.success("✅ All changes saved successfully")
 
         st.rerun()
 
@@ -537,7 +557,7 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
                     st.session_state.pop("serial_search", None)
                     st.session_state.pop("status_search", None)
                     st.session_state.pop("fa_type_search", None)
-                    
+
                     st.rerun()
 
             with col2:
