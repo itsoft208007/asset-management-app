@@ -274,16 +274,6 @@ if "df" not in st.session_state:
 
         st.session_state.df = pd.DataFrame(columns=columns)
 
-    old_df = pd.read_excel("asset_data.xlsx")
-
-    save_data(old_df)
-
-    st.session_state.df = load_data()
-
-    st.success("✅ Old Excel data imported successfully")
-
-    st.rerun()
-
 # ==========================
 # ADD NEW ASSET
 # ==========================
