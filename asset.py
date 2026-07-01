@@ -123,7 +123,8 @@ conn = get_connection()
 
 conn.execute("""
 CREATE TABLE IF NOT EXISTS assets (
-    FA_No TEXT PRIMARY KEY,
+    ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    FA_No TEXT,
     Description TEXT,
     Serial_No_ TEXT,
     Responsible_Employee TEXT,
