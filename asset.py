@@ -607,17 +607,17 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
 
                     st.session_state.df.at[
                         original_idx, col
-                    ] = row[col]
+                        ] = row[col]
 
                 st.session_state.df.at[
                     original_idx,
                     "Last_Updated_By"
                 ] = st.session_state.username
 
-            st.session_state.df.at[
-                original_idx,
-                "Last_Updated_Date"
-            ] = datetime.now().strftime("%d-%m-%Y %H:%M")
+                st.session_state.df.at[
+                    original_idx,
+                    "Last_Updated_Date"
+                ] = datetime.now().strftime("%d-%m-%Y %H:%M")
 
         save_data(st.session_state.df)
 
