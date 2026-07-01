@@ -136,8 +136,34 @@ if menu == "📤 Import Data":
         # Remove extra spaces from column names
         import_df.columns = import_df.columns.str.strip()
 
-        # Check missing columns
-        missing_cols = set(columns) - set(import_df.columns)
+        # Last_Updated columns agar na ho to automatically add kar do
+
+        if "Last_Updated_By" not in import_df.columns:
+            import_df["Last_Updated_By"] = ""
+
+        if "Last_Updated_Date" not in import_df.columns:
+            import_df["Last_Updated_Date"] = ""
+
+        # Baaki required columns check karo
+        required_import_cols = [
+            "FA_No",
+            "Description",
+            "Serial_No_",
+            "Responsible_Employee",
+            "Employee_Code",
+            "Asset_Type",
+            "Fa_Type",
+            "Fa_Status",
+            "Status",
+            "Keyboard",
+            "Mouse",
+            "Headphone",
+            "Laptop_Stand",
+            "Vendor",
+            "Invoice_No_"
+        ]
+
+        missing_cols = set(required_import_cols) - set(import_df.columns)
 
         if missing_cols:
             st.error(f"Missing columns: {missing_cols}")
