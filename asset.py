@@ -274,8 +274,6 @@ if "df" not in st.session_state:
 
         st.session_state.df = pd.DataFrame(columns=columns)
 
-if st.button("📥 Import Old Excel To Database"):
-
     old_df = pd.read_excel("asset_data.xlsx")
 
     save_data(old_df)
@@ -590,34 +588,21 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
             errors="ignore"
         )
 
-        # FA_No ke basis par update karo
-        for _, row in edited_df.iterrows():
+        for idx, row in edited_df.iterrows():
 
-            fa_no = row["FA_No"]
+            for col in edited_df.columns:
 
-            original_idx = st.session_state.df[
-                st.session_state.df["FA_No"] == fa_no
-            ].index
+                st.session_state.df.at[idx, col] = row[col]
 
-            if len(original_idx) > 0:
+            st.session_state.df.at[
+                idx,
+                "Last_Updated_By"
+            ] = st.session_state.username
 
-                original_idx = original_idx[0]
-
-                for col in edited_df.columns:
-
-                    st.session_state.df.at[
-                        original_idx, col
-                        ] = row[col]
-
-                st.session_state.df.at[
-                    original_idx,
-                    "Last_Updated_By"
-                ] = st.session_state.username
-
-                st.session_state.df.at[
-                    original_idx,
-                    "Last_Updated_Date"
-                ] = datetime.now().strftime("%d-%m-%Y %H:%M")
+            st.session_state.df.at[
+                idx,
+                "Last_Updated_Date"
+            ] = datetime.now().strftime("%d-%m-%Y %H:%M")
 
         save_data(st.session_state.df)
 
