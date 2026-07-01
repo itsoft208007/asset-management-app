@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import openpyxl
 from datetime import datetime
+import sqlite3
 
 st.set_page_config(page_title="Asset Management", layout="wide")
 
@@ -49,7 +50,7 @@ if not st.session_state.logged_in:
     st.stop()
 
 if os.path.exists("Images.png"):
-    st.sidebar.image("Images.png", use_container_width=True)
+    st.sidebar.image("Images.png", width="stretch")
 
 if "username" in st.session_state:
     st.sidebar.success(f"Logged in as: {st.session_state.username}")
@@ -65,23 +66,25 @@ with st.sidebar.expander("⚙️ Assets", expanded=True):
     if st.session_state.get("role") == "admin":
 
         menu = st.radio(
-            "",
+            "Menu",
             [
                 "📋 List of Assets",
                 "➕ Add New Asset",
                 "📤 Import Data",
                 "📥 Export Data"
-            ]
+            ],
+            label_visibility="collapsed"
         )
 
     else:
 
         menu = st.radio(
-            "",
+            "Menu",
             [
                 "📋 List of Assets",
                 "📥 Export Data"
-            ]
+            ],
+            label_visibility="collapsed"
         )
 
 if st.sidebar.button("Logout"):
@@ -110,8 +113,47 @@ columns = [
     "Last_Updated_Date"
 ]
 
-# File name for permanent storage
-FILE_NAME = "asset_data.xlsx"
+# SQLite Database
+DB_NAME = "asset_data.db"
+
+def get_connection():
+    return sqlite3.connect(DB_NAME, check_same_thread=False)
+
+conn = get_connection()
+
+conn.execute("""
+CREATE TABLE IF NOT EXISTS assets (
+    FA_No TEXT PRIMARY KEY,
+    Description TEXT,
+    Serial_No_ TEXT,
+    Responsible_Employee TEXT,
+    Employee_Code TEXT,
+    Asset_Type TEXT,
+    Fa_Type TEXT,
+    Fa_Status TEXT,
+    Status TEXT,
+    Keyboard TEXT,
+    Mouse TEXT,
+    Headphone TEXT,
+    Laptop_Stand TEXT,
+    Vendor TEXT,
+    Invoice_No_ TEXT,
+    Last_Updated_By TEXT,
+    Last_Updated_Date TEXT
+)
+""")
+conn.commit()
+
+def load_data():
+    return pd.read_sql("SELECT * FROM assets", conn)
+
+def save_data(df):
+    df.to_sql(
+        "assets",
+        conn,
+        if_exists="replace",
+        index=False
+    )
 
 # ==========================
 # IMPORT DATA
@@ -211,37 +253,38 @@ if menu == "📤 Import Data":
                     ignore_index=True
                 )
 
-        # Save Excel
-        st.session_state.df.to_excel(
-            FILE_NAME,
-            index=False
-        )
+        save_data(st.session_state.df)
 
         st.success(
             "✅ Existing assets updated and new assets added successfully"
         )
 
-# Load existing data if file exists
+# Load data from SQLite
 if "df" not in st.session_state:
 
     try:
-        if os.path.exists(FILE_NAME):
-            
-            st.session_state.df = pd.read_excel(FILE_NAME)
+        st.session_state.df = load_data()
 
-        else:
-
-            st.warning("Excel file not found. New file will be created.")
-
+        if st.session_state.df.empty:
             st.session_state.df = pd.DataFrame(columns=columns)
 
     except Exception as e:
 
-        st.error(f"Error loading file: {e}")
+        st.error(f"Error loading database: {e}")
 
         st.session_state.df = pd.DataFrame(columns=columns)
 
-        st.write("Rows Loaded:", len(st.session_state.df))
+if st.button("📥 Import Old Excel To Database"):
+
+    old_df = pd.read_excel("asset_data.xlsx")
+
+    save_data(old_df)
+
+    st.session_state.df = load_data()
+
+    st.success("✅ Old Excel data imported successfully")
+
+    st.rerun()
 
 # ==========================
 # ADD NEW ASSET
@@ -351,7 +394,7 @@ if menu == "➕ Add New Asset":
                 ignore_index=True
             )
 
-            st.session_state.df.to_excel(FILE_NAME, index=False)
+            save_data(st.session_state.df)
 
             st.success("✅ Asset Added Successfully")
 
@@ -576,12 +619,7 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
                 "Last_Updated_Date"
             ] = datetime.now().strftime("%d-%m-%Y %H:%M")
 
-        # Excel save
-        st.session_state.df.to_excel(
-            FILE_NAME,
-            index=False,
-            engine="openpyxl"
-        )
+        save_data(st.session_state.df)
 
         # Filters clear karo
         st.session_state.pop("fa_search", None)
@@ -615,10 +653,7 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
                         edited_df["Delete"] == False
                     ].drop(columns=["Delete"])
 
-                    st.session_state.df.to_excel(
-                        FILE_NAME,
-                        index=False
-                    )
+                    save_data(st.session_state.df)
 
                     st.session_state.show_delete_confirm = False
 
@@ -706,10 +741,7 @@ if st.session_state.edit_mode:
             idx, "Last_Updated_Date"
         ] = datetime.now().strftime("%d-%m-%Y %H:%M")
 
-        st.session_state.df.to_excel(
-            FILE_NAME,
-            index=False
-        )
+        save_data(st.session_state.df)
 
         st.success("✅ Asset Updated Successfully")
 
@@ -735,7 +767,10 @@ if menu == "📥 Export Data":
 
     excel_file = "export_asset_data.xlsx"
 
-    st.session_state.df.to_excel(excel_file, index=False)
+    st.session_state.df.to_excel(
+        excel_file,
+        index=False
+    )
 
     with open(excel_file, "rb") as f:
         st.download_button(
