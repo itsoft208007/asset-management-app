@@ -143,18 +143,56 @@ if menu == "📤 Import Data":
             st.error(f"Missing columns: {missing_cols}")
             st.stop()
 
-        st.session_state.df = pd.concat(
-            [st.session_state.df, import_df],
-            ignore_index=True
-        )
+        # FA_No ke basis par update/add karo
 
+        for _, new_row in import_df.iterrows():
+
+            fa_no = str(new_row["FA_No"]).strip()
+
+            existing_idx = st.session_state.df[
+                st.session_state.df["FA_No"].astype(str).str.strip() == fa_no
+            ].index
+
+            # Agar FA already exist karta hai to update karo
+            if len(existing_idx) > 0:
+
+                idx = existing_idx[0]
+
+                for col in import_df.columns:
+                    st.session_state.df.at[idx, col] = new_row[col]
+
+                st.session_state.df.at[
+                    idx,
+                    "Last_Updated_By"
+                ] = st.session_state.username
+
+                st.session_state.df.at[
+                    idx,
+                    "Last_Updated_Date"
+                ] = datetime.now().strftime("%d-%m-%Y %H:%M")
+
+            # Agar naya FA hai to add karo
+            else:
+
+                new_row["Last_Updated_By"] = st.session_state.username
+                new_row["Last_Updated_Date"] = datetime.now().strftime("%d-%m-%Y %H:%M")
+
+                st.session_state.df = pd.concat(
+                    [
+                        st.session_state.df,
+                        pd.DataFrame([new_row])
+                    ],
+                    ignore_index=True
+                )
+
+        # Save Excel
         st.session_state.df.to_excel(
             FILE_NAME,
             index=False
         )
 
         st.success(
-            f"✅ {len(import_df)} records imported successfully"
+            "✅ Existing assets updated and new assets added successfully"
         )
 
 # Load existing data if file exists
@@ -483,25 +521,34 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
             errors="ignore"
         )
 
-        # Original dataframe me same index ki row update karo
-        for idx in edited_df.index:
+        # FA_No ke basis par update karo
+        for _, row in edited_df.iterrows():
 
-            if idx in st.session_state.df.index:
+            fa_no = row["FA_No"]
+
+            original_idx = st.session_state.df[
+                st.session_state.df["FA_No"] == fa_no
+            ].index
+
+            if len(original_idx) > 0:
+
+                original_idx = original_idx[0]
 
                 for col in edited_df.columns:
 
-                    st.session_state.df.at[idx, col] = edited_df.at[idx, col]
+                    st.session_state.df.at[
+                        original_idx, col
+                    ] = row[col]
 
-                # Update history
                 st.session_state.df.at[
-                    idx,
+                    original_idx,
                     "Last_Updated_By"
                 ] = st.session_state.username
 
-                st.session_state.df.at[
-                    idx,
-                    "Last_Updated_Date"
-                ] = datetime.now().strftime("%d-%m-%Y %H:%M")
+            st.session_state.df.at[
+                original_idx,
+                "Last_Updated_Date"
+            ] = datetime.now().strftime("%d-%m-%Y %H:%M")
 
         # Excel save
         st.session_state.df.to_excel(
