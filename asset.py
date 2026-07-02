@@ -120,6 +120,8 @@ def get_connection():
     return sqlite3.connect(DB_NAME, check_same_thread=False)
 
 conn = get_connection()
+st.write("Database Path:", os.path.abspath(DB_NAME))
+st.write("Database Exists:", os.path.exists(DB_NAME))
 
 conn.execute("""
 CREATE TABLE IF NOT EXISTS assets (
