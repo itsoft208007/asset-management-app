@@ -147,16 +147,40 @@ CREATE TABLE IF NOT EXISTS assets (
 """)
 conn.commit()
 
+# ==========================
+# DATABASE FUNCTIONS
+# ==========================
+
 def load_data():
     return pd.read_sql("SELECT * FROM assets", conn)
 
+
 def save_data(df):
-    df.to_sql(
+    save_df = df.copy()
+    save_df = save_df.drop(columns=["Delete"], errors="ignore")
+    save_df.to_sql(
         "assets",
         conn,
         if_exists="replace",
         index=False
     )
+
+
+# ==========================
+# LOAD DATA FROM SQLITE
+# ==========================
+
+if "df" not in st.session_state:
+    try:
+        st.session_state.df = load_data()
+
+        if st.session_state.df.empty:
+            st.session_state.df = pd.DataFrame(columns=columns)
+
+    except Exception as e:
+        st.error(f"Error loading database: {e}")
+        st.session_state.df = pd.DataFrame(columns=columns)
+
 
 # ==========================
 # IMPORT DATA
@@ -261,21 +285,6 @@ if menu == "📤 Import Data":
         st.success(
             "✅ Existing assets updated and new assets added successfully"
         )
-
-# Load data from SQLite
-if "df" not in st.session_state:
-
-    try:
-        st.session_state.df = load_data()
-
-        if st.session_state.df.empty:
-            st.session_state.df = pd.DataFrame(columns=columns)
-
-    except Exception as e:
-
-        st.error(f"Error loading database: {e}")
-
-        st.session_state.df = pd.DataFrame(columns=columns)
 
 # ==========================
 # ADD NEW ASSET
@@ -561,15 +570,20 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
 
     fa_list = df_show["FA_No"].dropna().astype(str).tolist()
 
-    selected_fa = st.selectbox(
-        "✏️ Select Asset To Edit",
-        fa_list
-    )
+    selected_fa = None
 
-    if st.button("✏️ Edit Selected Asset"):
-        st.session_state.selected_fa = selected_fa
-        st.session_state.edit_mode = True
-        st.rerun()
+    if fa_list:
+        selected_fa = st.selectbox(
+            "✏️ Select Asset To Edit",
+            fa_list
+        )
+
+        if st.button("✏️ Edit Selected Asset"):
+            st.session_state.selected_fa = selected_fa
+            st.session_state.edit_mode = True
+            st.rerun()
+    else:
+        st.info("No assets found.")
 
     if st.button("💾 Save Changes"):
 
@@ -627,9 +641,14 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
             with col1:
                 if st.button("✅ Yes, Delete"):
 
-                    st.session_state.df = edited_df[
-                        edited_df["Delete"] == False
-                    ].drop(columns=["Delete"])
+                    delete_indices = edited_df[
+                        edited_df["Delete"] == True
+                    ].index
+
+                    st.session_state.df = st.session_state.df.drop(
+                        index=delete_indices,
+                        errors="ignore"
+                    ).reset_index(drop=True)
 
                     save_data(st.session_state.df)
 
