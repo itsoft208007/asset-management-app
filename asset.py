@@ -158,12 +158,18 @@ def load_data():
 def save_data(df):
     save_df = df.copy()
     save_df = save_df.drop(columns=["Delete"], errors="ignore")
-    save_df.to_sql(
-        "assets",
-        conn,
-        if_exists="replace",
-        index=False
-    )
+
+    db_columns = [col for col in columns if col in save_df.columns]
+    save_df = save_df[db_columns]
+
+    with conn:
+        conn.execute("DELETE FROM assets")
+        save_df.to_sql(
+            "assets",
+            conn,
+            if_exists="append",
+            index=False
+        )
 
 
 # ==========================
@@ -196,95 +202,125 @@ if menu == "📤 Import Data":
 
     if uploaded_file is not None:
 
-        if uploaded_file.name.endswith(".csv"):
-            import_df = pd.read_csv(uploaded_file)
-
-        else:
-            import_df = pd.read_excel(uploaded_file)
-
-        # Remove extra spaces from column names
-        import_df.columns = import_df.columns.str.strip()
-
-        # Last_Updated columns agar na ho to automatically add kar do
-
-        if "Last_Updated_By" not in import_df.columns:
-            import_df["Last_Updated_By"] = ""
-
-        if "Last_Updated_Date" not in import_df.columns:
-            import_df["Last_Updated_Date"] = ""
-
-        # Baaki required columns check karo
-        required_import_cols = [
-            "FA_No",
-            "Description",
-            "Serial_No_",
-            "Responsible_Employee",
-            "Employee_Code",
-            "Asset_Type",
-            "Fa_Type",
-            "Fa_Status",
-            "Status",
-            "Keyboard",
-            "Mouse",
-            "Headphone",
-            "Laptop_Stand",
-            "Vendor",
-            "Invoice_No_"
-        ]
-
-        missing_cols = set(required_import_cols) - set(import_df.columns)
-
-        if missing_cols:
-            st.error(f"Missing columns: {missing_cols}")
-            st.stop()
-
-        # FA_No ke basis par update/add karo
-
-        for _, new_row in import_df.iterrows():
-
-            fa_no = str(new_row["FA_No"]).strip()
-
-            existing_idx = st.session_state.df[
-                st.session_state.df["FA_No"].astype(str).str.strip() == fa_no
-            ].index
-
-            # Agar FA already exist karta hai to update karo
-            if len(existing_idx) > 0:
-
-                idx = existing_idx[0]
-
-                for col in import_df.columns:
-                    st.session_state.df.at[idx, col] = new_row[col]
-
-                st.session_state.df.at[
-                    idx,
-                    "Last_Updated_By"
-                ] = st.session_state.username
-
-                st.session_state.df.at[
-                    idx,
-                    "Last_Updated_Date"
-                ] = datetime.now().strftime("%d-%m-%Y %H:%M")
-
-            # Agar naya FA hai to add karo
+        try:
+            if uploaded_file.name.lower().endswith(".csv"):
+                import_df = pd.read_csv(uploaded_file)
             else:
+                import_df = pd.read_excel(uploaded_file)
 
-                new_row["Last_Updated_By"] = st.session_state.username
-                new_row["Last_Updated_Date"] = datetime.now().strftime("%d-%m-%Y %H:%M")
+            import_df.columns = import_df.columns.str.strip()
 
-                st.session_state.df = pd.concat(
-                    [
-                        st.session_state.df,
-                        pd.DataFrame([new_row])
-                    ],
-                    ignore_index=True
-                )
+            required_import_cols = [
+                "FA_No",
+                "Description",
+                "Serial_No_",
+                "Responsible_Employee",
+                "Employee_Code",
+                "Asset_Type",
+                "Fa_Type",
+                "Fa_Status",
+                "Status",
+                "Keyboard",
+                "Mouse",
+                "Headphone",
+                "Laptop_Stand",
+                "Vendor",
+                "Invoice_No_"
+            ]
 
-        save_data(st.session_state.df)
+            missing_cols = set(required_import_cols) - set(import_df.columns)
 
-        st.success(
-            "✅ Existing assets updated and new assets added successfully"
-        )
+            if missing_cols:
+                st.error(f"Missing columns: {sorted(missing_cols)}")
+            else:
+                st.success(f"File ready: {len(import_df)} rows found")
+                st.dataframe(import_df.head(10), use_container_width=True)
+
+                if st.button("📥 Import Data Now", type="primary"):
+
+                    current_df = st.session_state.df.copy()
+
+                    if "ID" in current_df.columns:
+                        current_df = current_df.drop(columns=["ID"])
+
+                    for col in columns:
+                        if col not in current_df.columns:
+                            current_df[col] = ""
+
+                    current_df = current_df[columns]
+
+                    imported_count = 0
+                    updated_count = 0
+                    skipped_count = 0
+
+                    for _, new_row in import_df.iterrows():
+
+                        raw_fa_no = new_row.get("FA_No", "")
+
+                        if pd.isna(raw_fa_no) or str(raw_fa_no).strip() == "":
+                            skipped_count += 1
+                            continue
+
+                        fa_no = str(raw_fa_no).strip()
+
+                        existing_idx = current_df[
+                            current_df["FA_No"]
+                            .astype(str)
+                            .str.strip()
+                            .str.casefold() == fa_no.casefold()
+                        ].index
+
+                        row_data = {}
+
+                        for col in columns:
+                            if col in ["Last_Updated_By", "Last_Updated_Date"]:
+                                continue
+
+                            value = new_row[col] if col in import_df.columns else ""
+
+                            if pd.isna(value):
+                                value = ""
+
+                            row_data[col] = value
+
+                        row_data["FA_No"] = fa_no
+                        row_data["Last_Updated_By"] = st.session_state.username
+                        row_data["Last_Updated_Date"] = datetime.now().strftime(
+                            "%d-%m-%Y %H:%M"
+                        )
+
+                        if len(existing_idx) > 0:
+                            idx = existing_idx[0]
+
+                            for col, value in row_data.items():
+                                current_df.at[idx, col] = value
+
+                            updated_count += 1
+
+                        else:
+                            current_df = pd.concat(
+                                [
+                                    current_df,
+                                    pd.DataFrame([row_data], columns=columns)
+                                ],
+                                ignore_index=True
+                            )
+
+                            imported_count += 1
+
+                    save_data(current_df)
+                    st.session_state.df = load_data()
+
+                    st.success(
+                        f"✅ Import completed | New: {imported_count} | "
+                        f"Updated: {updated_count} | Skipped: {skipped_count}"
+                    )
+
+                    st.rerun()
+
+        except Exception as e:
+            st.error(f"Import failed: {e}")
+
 
 # ==========================
 # ADD NEW ASSET
@@ -395,6 +431,7 @@ if menu == "➕ Add New Asset":
             )
 
             save_data(st.session_state.df)
+            st.session_state.df = load_data()
 
             st.success("✅ Asset Added Successfully")
 
@@ -563,7 +600,7 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
         hide_index=False,
         key="asset_editor",
         num_rows="fixed",
-        disabled=["Last_Updated_By", "Last_Updated_Date"]
+        disabled=["ID", "Last_Updated_By", "Last_Updated_Date"]
     )
 
     st.session_state["edited_df"] = edited_df
@@ -612,6 +649,7 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
             ] = datetime.now().strftime("%d-%m-%Y %H:%M")
 
         save_data(st.session_state.df)
+        st.session_state.df = load_data()
 
         # Filters clear karo
         st.session_state.pop("fa_search", None)
@@ -651,6 +689,7 @@ if menu == "📋 List of Assets" and not st.session_state.edit_mode:
                     ).reset_index(drop=True)
 
                     save_data(st.session_state.df)
+                    st.session_state.df = load_data()
 
                     st.session_state.show_delete_confirm = False
 
@@ -739,6 +778,7 @@ if st.session_state.edit_mode:
         ] = datetime.now().strftime("%d-%m-%Y %H:%M")
 
         save_data(st.session_state.df)
+        st.session_state.df = load_data()
 
         st.success("✅ Asset Updated Successfully")
 
