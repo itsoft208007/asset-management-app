@@ -117,7 +117,7 @@ columns = [
 # SUPABASE POSTGRES DATABASE
 # ==========================
 
-DATABASE_URL = st.secrets["postgresql://postgres:[YOUR-PASSWORD]@db.unkzftlltiibqnncskoa.supabase.co:5432/postgres"]
+DATABASE_URL = st.secrets["DATABASE_URL"]
 
 engine = create_engine(
     DATABASE_URL,
