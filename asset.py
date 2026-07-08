@@ -3,7 +3,7 @@ import pandas as pd
 import os
 import openpyxl
 from datetime import datetime
-import sqlite3
+from sqlalchemy import create_engine, text
 
 st.set_page_config(page_title="Asset Management", layout="wide")
 
@@ -113,64 +113,61 @@ columns = [
     "Last_Updated_Date"
 ]
 
-# SQLite Database
-DB_NAME = "asset_data.db"
+# ==========================
+# SUPABASE POSTGRES DATABASE
+# ==========================
 
-def get_connection():
-    return sqlite3.connect(DB_NAME, check_same_thread=False)
+DATABASE_URL = st.secrets["DATABASE_URL"]
 
-conn = get_connection()
-st.write("Database Path:", os.path.abspath(DB_NAME))
-st.write("Database Exists:", os.path.exists(DB_NAME))
-
-conn.execute("""
-CREATE TABLE IF NOT EXISTS assets (
-    ID INTEGER PRIMARY KEY AUTOINCREMENT,
-    FA_No TEXT,
-    Description TEXT,
-    Serial_No_ TEXT,
-    Responsible_Employee TEXT,
-    Employee_Code TEXT,
-    Asset_Type TEXT,
-    Fa_Type TEXT,
-    Fa_Status TEXT,
-    Status TEXT,
-    Keyboard TEXT,
-    Mouse TEXT,
-    Headphone TEXT,
-    Laptop_Stand TEXT,
-    Vendor TEXT,
-    Invoice_No_ TEXT,
-    Last_Updated_By TEXT,
-    Last_Updated_Date TEXT
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True
 )
-""")
-conn.commit()
 
 # ==========================
 # DATABASE FUNCTIONS
 # ==========================
 
 def load_data():
-    return pd.read_sql("SELECT * FROM assets", conn)
+
+    query = 'SELECT * FROM assets ORDER BY "ID"'
+
+    return pd.read_sql(
+        query,
+        engine
+    )
 
 
 def save_data(df):
-    save_df = df.copy()
-    save_df = save_df.drop(columns=["Delete"], errors="ignore")
 
-    db_columns = [col for col in columns if col in save_df.columns]
+    save_df = df.copy()
+
+    save_df = save_df.drop(
+        columns=["Delete", "ID"],
+        errors="ignore"
+    )
+
+    db_columns = [
+        col
+        for col in columns
+        if col in save_df.columns
+    ]
+
     save_df = save_df[db_columns]
 
-    with conn:
-        conn.execute("DELETE FROM assets")
+    with engine.begin() as conn:
+
+        conn.execute(
+            text("DELETE FROM assets")
+        )
+
         save_df.to_sql(
             "assets",
             conn,
             if_exists="append",
-            index=False
+            index=False,
+            method="multi"
         )
-
 
 # ==========================
 # LOAD DATA FROM SQLITE
